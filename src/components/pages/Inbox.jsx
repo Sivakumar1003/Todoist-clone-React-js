@@ -46,7 +46,7 @@ export default function Inbox() {
       })
       .catch(() => {
         messageApi.open({ type: "error", content: "not able to delete task..." })
-      })
+      });
   }
 
   function completeTask(id) {
