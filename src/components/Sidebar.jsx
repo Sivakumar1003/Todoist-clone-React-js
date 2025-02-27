@@ -155,8 +155,8 @@ export default function Sidebar() {
       collapsible
       collapsed={collapsed}
       collapsedWidth={0}
-      breakpoint="md"
-      style={{ minHeight: "100vh", position: "relative", backgroundColor: "rgb(248,219,158,0.1)" }}
+      width={280}
+      style={{ minHeight: "100vh", position: "relative", backgroundColor: "rgb(248,219,158,0.1)", paddingLeft: "20px" }}
     >
 
       {contextHolder}
