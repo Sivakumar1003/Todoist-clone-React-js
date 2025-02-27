@@ -1,10 +1,11 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { dataContext } from '../../App'
-import { Checkbox } from 'antd';
+import { Button, Checkbox } from 'antd';
 import { DeleteOutlined, EditOutlined, PlusCircleFilled } from '@ant-design/icons';
 import NewTask from '../Task/NewTask';
 import useMessage from 'antd/es/message/useMessage';
 import EditTask from '../Task/EditTask';
+import MoveTask from '../Task/MoveTask';
 
 function Projects() {
 
@@ -12,6 +13,7 @@ function Projects() {
   const [newTask, setNewTask] = useState(false);
   const [messageApi, contextHolder] = useMessage();
   const [editTask, setEditTask] = useState("");
+  const [changeProject, setChangeProject] = useState("");
 
 
   const allProject = [];
@@ -69,7 +71,7 @@ function Projects() {
   }
 
   return (
-    <div >
+    <div className='mx-[10%]'>
 
       {contextHolder}
       {selectedProject ?
@@ -88,10 +90,11 @@ function Projects() {
                           <div>
                             <p className='text-xs'>{task["content"]}</p>
                             <p className='text-xs'>{task["description"]}</p>
-                            <p className='text-xs'>{task["due"]["date"]}</p>
+                            <p className='text-xs'>{task?.due?.date}</p>
                           </div>
                         </div>
-                        <div className='flex gap-5'>
+                        <div className='flex gap-5 items-center'>
+                          <Button onClick={() => {setChangeProject(task)}}>move</Button>
                           <EditOutlined onClick={() => {setEditTask(task)}} />
                           <DeleteOutlined onClick={() => {deleteTask(task["id"])}} />
                         </div>
@@ -133,6 +136,7 @@ function Projects() {
         </div>
       }
       <EditTask editTask={editTask} setEditTask={setEditTask}/>
+      <MoveTask changeProject={changeProject} setChangeProject={setChangeProject} projects={projects} api={api} setAllTask={setAllTask} />
     </div>
   )
 }
