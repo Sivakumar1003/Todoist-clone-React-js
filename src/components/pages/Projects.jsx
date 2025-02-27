@@ -4,13 +4,14 @@ import { Checkbox } from 'antd';
 import { DeleteOutlined, EditOutlined, PlusCircleFilled } from '@ant-design/icons';
 import NewTask from '../Task/NewTask';
 import useMessage from 'antd/es/message/useMessage';
+import EditTask from '../Task/EditTask';
 
 function Projects() {
 
   const { selectedProject, projects, setSelectedProject, allTask, api, setAllTask } = useContext(dataContext);
   const [newTask, setNewTask] = useState(false);
   const [messageApi, contextHolder] = useMessage();
-  const [editTask, setEditTask] = useState(false);
+  const [editTask, setEditTask] = useState("");
 
 
   const allProject = [];
@@ -91,7 +92,7 @@ function Projects() {
                           </div>
                         </div>
                         <div className='flex gap-5'>
-                          <EditOutlined  />
+                          <EditOutlined onClick={() => {setEditTask(task)}} />
                           <DeleteOutlined onClick={() => {deleteTask(task["id"])}} />
                         </div>
                       </div>
@@ -131,6 +132,7 @@ function Projects() {
           </div>
         </div>
       }
+      <EditTask editTask={editTask} setEditTask={setEditTask}/>
     </div>
   )
 }
