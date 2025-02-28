@@ -5,3 +5,8 @@
     --breakpoint-md: 600px;
     --breakpoint-lg: 1200px;
 }
+
+.ant-menu-item-selected {
+    background-color: rgba(255, 145, 55, 0.445) !important;
+    color: rgb(252, 2, 2) !important;
+}
