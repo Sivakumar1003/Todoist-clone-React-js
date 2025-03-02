@@ -1,14 +1,22 @@
-import { Button, Modal, Switch } from 'antd'
-import React, { useContext, useState } from 'react'
+import { Button, Input, Modal, Switch } from 'antd'
+import { useContext, useEffect, useRef, useState } from 'react'
 import { dataContext } from '../../App';
 import useMessage from 'antd/es/message/useMessage';
+import addProject from '../../service/project/addProject';
 
 function AddProject({ newProject, setNewProject }) {
 
-    const { api, setProjects } = useContext(dataContext);
+    const { setProjects } = useContext(dataContext);
     const [messageApi, contextHolder] = useMessage();
-    const [isFavorite, setIsFavorite] = useState(false);
+    const okButton = useRef();
     const [projectName, setProjectName] = useState("");
+    const [isFavorite, setIsFavorite] = useState(false);
+
+    useEffect(() => {
+        if(newProject) {
+        okButton.current.disabled = false;
+        }
+    }, [newProject])
 
     function handelCancel() {
         setProjectName("");
@@ -16,21 +24,22 @@ function AddProject({ newProject, setNewProject }) {
         setNewProject(false);
     }
 
-    function handelOK() {
-        api.addProject({ name:`${projectName}`, is_favorite:isFavorite})
-            .then((response) => {
-                setProjects(previousProject  => {
-                    return {
-                        ...previousProject, 
-                        results: [...previousProject["results"], response]
-                    };
-                })
-                handelCancel();
-                messageApi.open({type:"success", content:"Project added successfully."})
-            })
-            .catch(() => {
-                messageApi.open({type:"error", content:"Not able to add project."})
-            })
+    async function handelOK() {
+
+        okButton.current.disabled = true;
+        const  project = {
+            name: projectName,
+            is_favorite: isFavorite 
+        }
+        try {
+            let newProject = await addProject(project);
+            setProjects(previousProjects => [...previousProjects, newProject]);
+            messageApi.open({ type: "success", content: "Project added successfully." })
+        }
+        catch {
+            messageApi.open({ type: "error", content: "Not able to add project." })
+        }
+        handelCancel()
     }
 
     return (
@@ -41,20 +50,26 @@ function AddProject({ newProject, setNewProject }) {
         >
             {contextHolder}
             <label className='text-base font-bold'>Name</label>
-            <input
-                className='border border-gray-400 text-base p-2 w-full mt-1 h-[35px] focus:outline-none'
+            <Input
                 placeholder='Project name'
                 value={projectName}
+                maxLength="30"
                 onChange={(e) => { setProjectName(e.target.value) }}
-            ></input>
+            >
+            </Input>
 
             <div className='flex my-5 gap-3'>
-                <Switch value={isFavorite} onChange={() => { setIsFavorite(pre => !pre) }} />
+                <Switch value={isFavorite} onChange={() => setIsFavorite(pre => !pre)} />
                 <p>{isFavorite ? "remove from favorite" : "Add to Favorite"}</p>
             </div>
             <div className='flex gap-3 justify-end'>
                 <Button onClick={handelCancel}>Cancel</Button>
-                <Button onClick={handelOK} style={projectName.trim() !== "" && { background: "red", color: "white" }} disabled={projectName.trim() === ""}>Add Project</Button>
+                <Button
+                    onClick={handelOK} style={projectName.trim() !== "" && { background: "red", color: "white" }}
+                    disabled={projectName.trim() === ""}
+                    ref={okButton}
+                >
+                    Add Project</Button>
             </div>
         </Modal>
     )

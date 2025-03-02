@@ -1,43 +1,36 @@
 import { Button, Modal, Switch } from 'antd'
 import useMessage from 'antd/es/message/useMessage';
-import React, { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import updateProject from '../../service/project/updateProject';
 
-function EditProject({ editProject, setEditProjecct, api, setProjects }) {
+function EditProject({ editProject, setEditProjecct, setProjects }) {
     const [projectName, setProjectName] = useState("");
     const [isFavorite, setIsFavorite] = useState(false);
     const [messageApi, contextHolder] = useMessage();
+    const editButton = useRef();
 
     useEffect(() => {
         if (editProject) {
             setProjectName(editProject["name"]);
-            setIsFavorite(editProject["isFavorite"]);
+            setIsFavorite(editProject["is_favorite"]);
+            editButton.current.disabled = false;
         }
     }, [editProject]);
 
 
-    function handelOK() {
-        api.updateProject(editProject["id"], { name: `${projectName}`, is_favorite: isFavorite })
-            .then((response) => {
-                setProjects((prevData) => {
-                    return {
-                        ...prevData,
-                        results: prevData["results"].map(project => {
-                            if(project["id"] == editProject["id"]) {
-                                return response;
-                            }else {
-                                return project;
-                            }
-                        })
-                    }
-                })
+    async function handelOK() {
 
-                setEditProjecct("")
-
-                messageApi.open({type:"success", content:"Successfull changed name."})
-            })
-            .catch(() => {
-                messageApi.open({ type: "error", content: "Not able to edit name." })
-            })
+        try {
+            editButton.current.disabled = true;
+            let updatedProject = await updateProject({ ...editProject, name: `${projectName}`, is_favorite: isFavorite });
+            setProjects(previousProjects => previousProjects.map(project => project["id"] == editProject["id"] ? updatedProject : project ))
+            messageApi.open({ type: "success", content: "Successfull changed name." })
+        }
+        catch {
+            messageApi.open({ type: "error", content: "Not able to edit name." })
+        }
+        setEditProjecct("");
+        setProjectName("");
     }
     return (
         <Modal
@@ -62,6 +55,7 @@ function EditProject({ editProject, setEditProjecct, api, setProjects }) {
                     onClick={handelOK}
                     style={{ background: "red", color: "white" }}
                     disabled={projectName.trim() === "" || (editProject?.name == projectName && editProject?.isFavorite == isFavorite)}
+                    ref={editButton}
                 >
                     Edit Name
                 </Button>

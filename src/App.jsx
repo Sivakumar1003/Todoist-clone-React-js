@@ -1,17 +1,15 @@
-import React, { createContext, useEffect, useState } from 'react'
+import { createContext, useEffect, useState } from 'react'
 
 import Sidebar from './components/Sidebar'
 import Content from './components/Content'
-import { TodoistApi } from '@doist/todoist-api-typescript';
-import { message } from 'antd';
+import { message, Splitter } from 'antd';
+import getProject from './service/project/getProject';
+import getTask from './service/task/getTask';
 
 export const dataContext = createContext();
 
-
-
 function App() {
 
-  const api = new TodoistApi("ea9c4561b70368439c492e22689f80d8eda7b1a1");
 
   const [messageApi, contextHolder] = message.useMessage();
   const [projects, setProjects] = useState(null);
@@ -19,28 +17,25 @@ function App() {
   const [allTask, setAllTask] = useState(null);
 
   useEffect(() => {
-
-    api.getProjects()
-      .then((response) => {
+    
+    getProject()
+      .then(response => {
         setProjects(response);
       })
       .catch(() => {
         messageApi.open({ type: 'error', content: 'Not able fetch the projects.' })
       });
 
-    api.getTasks()
+    getTask()
       .then(response => {
-        setAllTask(response["results"])
+        setAllTask(response)
       })
-      .catch(error => {
+      .catch(() => {
         messageApi.open({ type: 'error', content: 'Not able fetch the task.' })
       })
-
-
-  }, []);
+  },[]);
 
   const Details = {
-    api,
     projects,
     allTask,
     selectedProject,
@@ -55,11 +50,18 @@ function App() {
 
   return (
     <dataContext.Provider value={Details}>
+
       {contextHolder}
-      <div className='flex'>
-        <Sidebar />
-        <Content />
-      </div>
+      <Splitter style={{ height: '100vh' }}>
+      <Splitter.Panel defaultSize="30%" min="10%" max="50%">
+          <Sidebar />
+        </Splitter.Panel>
+
+        <Splitter.Panel defaultSize="70%" min="50%" max="90%">
+          <Content />
+        </Splitter.Panel>
+
+      </Splitter>
     </dataContext.Provider>
   )
 }

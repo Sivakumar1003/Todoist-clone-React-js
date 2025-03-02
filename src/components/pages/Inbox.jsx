@@ -6,65 +6,58 @@ import { DeleteOutlined, EditOutlined, PlusCircleFilled } from "@ant-design/icon
 import NewTask from "../Task/NewTask";
 import EditTask from "../Task/EditTask";
 import MoveTask from "../Task/MoveTask";
+import deleteTask from "../../service/task/deleteTask";
+import completeTask from "../../service/task/completeTask";
 
 
 export default function Inbox() {
 
 
-  const {  projects, allTask, api, setAllTask } = useContext(dataContext);
+  const { projects, allTask, setAllTask } = useContext(dataContext);
   const [newTask, setNewTask] = useState(false);
   const [messageApi, contextHolder] = useMessage();
   const [editTask, setEditTask] = useState("");
   const [changeProject, setChangeProject] = useState("");
 
   let inboxProject;
-  if (projects && Array.isArray(projects["results"])) {
-    inboxProject = projects["results"].find(project => project["name"] === "Inbox");
+  if (projects && Array.isArray(projects)) {
+    inboxProject = projects.find(project => project["name"] === "Inbox");
   }
 
   const filteredAllTask = [];
-
-  if (inboxProject && allTask) {
+  if (inboxProject && Array.isArray(allTask)) {
     let id = inboxProject["id"];
-    allTask.forEach(task => {
-      if (task["projectId"] == id && !task["isCompleted"]) {
+    (allTask).forEach(task => {
+      if (task["project_id"] == id && !task["is_completed"]) {
         filteredAllTask.push(task);
       }
     });
   }
 
-  function deleteTask(id) {
-    api.deleteTask(id)
-      .then(() => {
-        setAllTask(previousTask => {
-          const newTask = (previousTask || []).filter(task => {
-            return task["id"] !== id
-          })
-          return newTask;
-        });
-        messageApi.open({ type: "success", content: "task deleted sucessfully..." })
+  async function handelDeleteTask(id) {
+    try {
+      await deleteTask(id);
+      setAllTask(previousTask => {
+        return previousTask.filter(task => task["id"] !== id);
       })
-      .catch(() => {
-        messageApi.open({ type: "error", content: "not able to delete task..." })
-      });
+      messageApi.open({ type: "success", content: "task deleted sucessfully..." })
+    }
+    catch {
+      messageApi.open({ type: "error", content: "not able to delete task..." })
+    }
   }
 
-  function completeTask(id) {
-    api.closeTask(id)
-      .then(response => {
-        setAllTask(previousTask => {
-          return (previousTask || []).map(task => {
-            if (task["id"] == id) {
-              task = { ...task, isCompleted: true }
-            }
-            return task;
-          })
-        })
-        messageApi.open({ type: "success", content: "Completed sucessfully..." })
+  async function handelCompleteTask(id) {
+    try {
+      await completeTask(id);
+      setAllTask(previousTask => {
+        return previousTask.map(task => task["id"] === id ? {...task, is_completed: true} : task)
       })
-      .catch(error => {
-        messageApi.open({ type: "error", content: "Could not mark task as complete..." })
-      })
+      messageApi.open({ type: "success", content: "Completed sucessfully..." })
+    }
+    catch {
+      messageApi.open({ type: "error", content: "Could not mark task as complete..." })
+    }
   }
 
   return (
@@ -80,19 +73,19 @@ export default function Inbox() {
               <div>
                 {
                   filteredAllTask.map(task => {
-                    return <div className='flex gap-3 p-1 m-2 justify-between max-w-[600px]' key={task["id"]}>
+                    return <div className='flex gap-3 m-2 justify-between max-w-[650px] border border-gray-300 rounded-2xl p-3 px-5' key={task["id"]}>
                       <div className='flex gap-5'>
-                        <Checkbox onChange={() => { completeTask(task["id"]) }} />
-                        <div>
-                          <p className='text-xs'>{task["content"]}</p>
+                        <Checkbox onChange={() => { handelCompleteTask(task["id"]) }} />
+                        <div className="flex flex-col gap-1">
+                          <p className='text-xs p-1 font-bold'>{task["content"]}</p>
                           <p className='text-xs'>{task["description"]}</p>
-                          <p className='text-xs'>{task?.due?.date}</p>
+                          <p className='text-xs opacity-60'>{task?.due?.date}</p>
                         </div>
                       </div>
                       <div className='flex gap-5 items-center'>
                         <Button onClick={() => { setChangeProject(task) }}>move</Button>
                         <EditOutlined onClick={() => { setEditTask(task) }} />
-                        <DeleteOutlined onClick={() => { deleteTask(task["id"]) }} />
+                        <DeleteOutlined onClick={() => { handelDeleteTask(task["id"]) }} />
                       </div>
                     </div>
                   })
@@ -117,7 +110,7 @@ export default function Inbox() {
 
       </div>
       <EditTask editTask={editTask} setEditTask={setEditTask} />
-      <MoveTask changeProject={changeProject} setChangeProject={setChangeProject} projects={projects} api={api} setAllTask={setAllTask}/>
+      <MoveTask changeProject={changeProject} setChangeProject={setChangeProject} projects={projects} setAllTask={setAllTask} />
     </div>
   )
 }

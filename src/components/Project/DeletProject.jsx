@@ -1,42 +1,54 @@
-import { Modal } from 'antd'
+import { Button, Modal } from 'antd'
 import useMessage from 'antd/es/message/useMessage'
-import React from 'react'
+import { useEffect, useRef } from 'react'
+import deleteProject from '../../service/project/deleteProject';
 
-function DeletProject({ deleteProject, setDeleteProject, api, setProjects }) {
+function DeletProject({ SelectedDeleteProject, setDeleteProject, setProjects }) {
 
   const [messageApi, contextHolder] = useMessage();
+  const deleteButton = useRef();
+
+  useEffect(() => {
+    if (SelectedDeleteProject) {
+      deleteButton.current.disabled = false;
+
+    }
+  }, [SelectedDeleteProject])
 
   function cancelDelete() {
     setDeleteProject(null)
   }
 
-  function confirmDelete() {
-    api.deleteProject(deleteProject["id"])
-      .then(() => {
-        setProjects(previousData => {
-          return {
-            ...previousData,
-            results: previousData["results"].filter(preProject => {
-              return preProject["id"] !== deleteProject["id"];
-            })
-          }
-        })
-        messageApi.open({ type: "success", content: "Project deleted successfully." })
-        setDeleteProject(null);
-      })
-      .catch(() => {
-        messageApi.open({ type: "error", content: "Failed to delete project." })
-      })
+  async function confirmDelete() {
+    deleteButton.current.disabled = true;
+    try {
+      await deleteProject((SelectedDeleteProject["id"]));
+      setProjects(previousProjeccts => previousProjeccts.filter(project => project["id"] !== SelectedDeleteProject["id"]));
+      messageApi.open({ type: "success", content: "Project deleted successfully." })
+    }
+    catch {
+      messageApi.open({ type: "error", content: "Failed to delete project." })
+    }
+    cancelDelete();
   }
   return (
     <Modal
-      open={deleteProject}
+      open={SelectedDeleteProject}
       title="Delete Projet"
-      onCancel={cancelDelete}
-      onOk={confirmDelete}
+      footer={null}
     >
       {contextHolder}
-      {deleteProject && <p>{`Are you sure you want to delete ${deleteProject["name"]} project.`}</p>}
+      {SelectedDeleteProject && <p>{`Are you sure you want to delete ${SelectedDeleteProject["name"]} project.`}</p>}
+      <div className='m-5 flex justify-end gap-5'>
+        <Button onClick={cancelDelete}>Cancel</Button>
+        <Button
+          style={{ color: "white", background: "red" }}
+          onClick={confirmDelete}
+          ref={deleteButton}
+        >
+          Delete
+        </Button>
+      </div>
     </Modal>
   )
 }

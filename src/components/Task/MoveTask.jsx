@@ -1,21 +1,25 @@
 import { Button, Modal, Select } from 'antd'
 import useMessage from 'antd/es/message/useMessage';
-import React, { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import deleteTask from '../../service/task/deleteTask';
+import addTask from '../../service/task/addTask';
 
-function MoveTask({ changeProject, setChangeProject, projects, api, setAllTask }) {
+function MoveTask({ changeProject, setChangeProject, projects, setAllTask }) {
 
     const [changeId, setChangeId] = useState(null);
+    const moveButton = useRef();
     const [messageApi, contextHolder] = useMessage();
 
     useEffect(() => {
         if (changeProject) {
-            setChangeId(changeProject["projectId"]);
+            setChangeId(changeProject["project_id"]);
+            moveButton.current.disabled = false;
         }
     }, [changeProject])
 
     const allProject = [];
-    if (projects && Array.isArray(projects["results"])) {
-        projects["results"].forEach(project => {
+    if (projects && Array.isArray(projects)) {
+        projects.forEach(project => {
             allProject.push(project);
         });
     }
@@ -24,38 +28,23 @@ function MoveTask({ changeProject, setChangeProject, projects, api, setAllTask }
         setChangeProject("")
     }
 
-    function handelChange() {
+    async function handelTaskMove() {
 
-        const details = {
-            content: changeProject["content"],
-            description: changeProject["description"],
-            due_date:changeProject?.due?.date,
-            priority: changeProject["priority"],
-            project_id: changeId,
+        const task = { ...changeProject, project_id: changeId };
+        moveButton.current.disabled = true;
+
+        try {
+            await deleteTask(changeProject["id"]);
+            let movedTask = await addTask(task);
+            setAllTask(previousTask => previousTask.map(task => task["id"] == changeProject["id"] ? movedTask : task))
+
+            messageApi.open({ type: "success", content: "removed here, Not able add in new project." })
+        }
+        catch {
+
+            messageApi.open({ type: "error", content: "Not able to remove from this project." })
         }
 
-        api.deleteTask(changeProject["id"])
-        .then(() => {
-            api.addTask(details)
-            .then(response => {
-                setAllTask(pre => {
-                    return pre.map(task => {
-                        if(changeProject["id"] == task["id"]) {
-                            return response 
-                        } else {
-                            return task
-                        }
-                    })
-                })
-                messageApi.open({type:"success", content:"successfull moved to another project."})
-            })
-            .catch(() => {
-                messageApi.open({type:"error", content:"removed here, Not able add in new project."})
-            })
-        })
-        .catch(() => {
-            messageApi.open({type:"error", content:"Not able to remove from this project."})
-        })
 
         handelCancel();
     }
@@ -79,9 +68,10 @@ function MoveTask({ changeProject, setChangeProject, projects, api, setAllTask }
                 <Button
                     disabled={changeProject?.projectId == changeId}
                     style={{ background: "red", color: "white", fontWeight: "bold" }}
-                    onClick={handelChange}
+                    onClick={handelTaskMove}
+                    ref={moveButton}
                 >
-                    change
+                    Move
                 </Button>
             </div>
         </Modal>

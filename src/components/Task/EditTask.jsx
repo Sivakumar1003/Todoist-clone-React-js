@@ -1,16 +1,19 @@
-import { Button, DatePicker, Modal, Select } from 'antd'
+import { Button, DatePicker, Input, Modal, Select } from 'antd'
 import useMessage from 'antd/es/message/useMessage';
-import React, { useContext, useEffect, useRef, useState } from 'react'
+import { useContext, useEffect, useRef, useState } from 'react'
 import { dataContext } from '../../App';
+import updateTask from '../../service/task/updateTask';
+import TextArea from 'antd/es/input/TextArea';
 
 function EditTask({ editTask, setEditTask }) {
 
 
-  const { projects, setAllTask, api } = useContext(dataContext)
+  const { projects, setAllTask } = useContext(dataContext)
   const [messageApi, contextHolder] = useMessage();
 
   const dateInput = useRef();
   const datePriority = useRef();
+  const editButton = useRef();
 
   const [task, setTask] = useState("");
   const [description, setDescription] = useState("");
@@ -23,19 +26,18 @@ function EditTask({ editTask, setEditTask }) {
       setDescription(editTask["description"]);
       setDate(editTask?.due?.date || null);
       setPriority(`${editTask["priority"]}`);
+      editButton.current.disabled = false;
     }
-  },[editTask]);
+  }, [editTask]);
 
   const allProject = [];
-
   if (projects && Array.isArray(projects["results"])) {
-
     projects["results"].forEach(project => {
       allProject.push(project);
     });
   }
 
-  function handelDate(dateObj, dateString) {
+  function handelDate(_, dateString) {
     dateInput.current.textContent = dateString;
     setDate(dateString);
   }
@@ -49,7 +51,7 @@ function EditTask({ editTask, setEditTask }) {
     setEditTask("")
   }
 
-  function handleEditTask() {
+  async function handleEditTask() {
     const newTask = {
       content: task,
       description: description,
@@ -57,22 +59,17 @@ function EditTask({ editTask, setEditTask }) {
       priority: priority
     }
 
-    api.updateTask(`${editTask["id"]}`, newTask)
-    .then((response) => {
-      setAllTask(preTask => {
-        return preTask.map(task => {
-          if(task["id"] === editTask["id"]) {
-            return response;
-          } else {
-            return task;
-          }
-        })
-      })
-      messageApi.open({type:"success", content:"Successfully changed."})
-    })
-    .catch(() => {
-      messageApi.open({type:"error", content:"Not able to change."})
-    })
+    editButton.current.disabled = true;
+
+    try {
+      let updatedTask = await updateTask(newTask, editTask["id"]);
+      setAllTask(previousTask => previousTask.map(task => task["id"] == editTask["id"] ? updatedTask : task))
+      messageApi.open({ type: "success", content: "Successfully changed." })
+    }
+    catch {
+      messageApi.open({ type: "error", content: "Not able to change." })
+    }
+
     handelCancel();
   }
 
@@ -86,23 +83,25 @@ function EditTask({ editTask, setEditTask }) {
       {contextHolder}
       <div className='flex flex-col gap-2'>
         <div className='shadow-xs'>
-          <input
+          <Input
             type="text"
             value={task}
             placeholder='Add new Task'
             onChange={(e) => setTask(e.target.value)}
-            className=' font-black text-lg p-1 focus:outline-none'
+            maxLength="30"
           />
           <span ref={dateInput} className=' w-fit p-1 font-bold text-md'></span>
           <span ref={datePriority} className=' w-fit p-1 font-bold text-md'></span>
         </div>
 
-        <textarea
+        <TextArea
           value={description}
           placeholder='Task description'
           onChange={(e) => setDescription(e.target.value)}
-          className='font-normal text-sm shadow-xs focus:outline-none h-5'
-        ></textarea>
+          autoSize={{ minRows: 2, maxRows: 6 }}
+          maxLength="300"
+        >
+        </TextArea>
 
         <div className='flex gap-2'>
           <DatePicker onChange={handelDate} format="YYYY-MM-DD" />
@@ -120,7 +119,13 @@ function EditTask({ editTask, setEditTask }) {
 
         <div className='flex gap-4 justify-end'>
           <Button onClick={handelCancel}>Cancel</Button>
-          <Button style={{ background: "red", color: "white", fontWeight: "900" }} onClick={handleEditTask} >Edit Task</Button>
+          <Button
+            style={{ background: "red", color: "white", fontWeight: "900" }}
+            onClick={handleEditTask}
+            ref={editButton}
+            disabled={task.trim() == ""}
+          >Edit Task</Button>
+
         </div>
 
       </div>

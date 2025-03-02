@@ -1,18 +1,25 @@
-import { Button, DatePicker, Modal, Select } from 'antd'
-import React, { useContext, useRef, useState } from 'react'
+import { Button, DatePicker, Input, Modal, Select } from 'antd'
+import { useContext, useEffect, useRef, useState } from 'react'
 import { dataContext } from '../../App';
 import useMessage from 'antd/es/message/useMessage';
+import addTask from '../../service/task/addTask';
+import TextArea from 'antd/es/input/TextArea';
 
 function AddTask({ addTaskModel, setAddTaskModel }) {
 
-  const { projects, setAllTask, api } = useContext(dataContext)
+  const { projects, setAllTask } = useContext(dataContext)
   const [messageApi, contextHolder] = useMessage();
+  const addTaskBuuton = useRef();
+
+  useEffect(() => {
+    if(addTaskModel) {
+      addTaskBuuton.current.disabled = false;
+    }
+  }, [addTaskModel])
 
   const allProject = [];
-
-  if (projects && Array.isArray(projects["results"])) {
-
-    projects["results"].forEach(project => {
+  if (projects && Array.isArray(projects)) {
+    projects.forEach(project => {
       allProject.push(project);
     });
   }
@@ -27,7 +34,7 @@ function AddTask({ addTaskModel, setAddTaskModel }) {
   const datePriority = useRef();
 
 
-  function handelDate(dateObj, dateString) {
+  function handelDate(_, dateString) {
     dateInput.current.textContent = dateString;
     setDate(dateString);
   }
@@ -41,33 +48,35 @@ function AddTask({ addTaskModel, setAddTaskModel }) {
     setProjecctId(value)
   }
 
-  function handleAddTask() {
+  async function handleAddTask() {
+
+    let deefaultDate = new Date;
+    let currentDay = Number(deefaultDate.getDate());
+    let month = Number(deefaultDate.getMonth());
+    let year = deefaultDate.getFullYear();
 
     const newTask = {
       "content": task,
       "description": description,
-      "due_date": date,
+      "due_date": date || `${year}-${month < 10 ? "0" + month : month}-${currentDay < 10 ? "0" + currentDay : currentDay}`,
       "priority": priority,
       "project_id": projectId,
     }
+    
+    addTaskBuuton.current.disabled = true;
+    
+    try {
+      let taskAdded = await addTask(newTask);
+      messageApi.open({ type: "success", content: "task added successfully." });
+      setAllTask(pre => {
+        return [...pre, taskAdded]
+      });
+    }
+    catch {
+      messageApi.open({ type: "error", content: "task not able to add." })
+    }
 
-    api.addTask(newTask)
-      .then(response => {
-        messageApi.open({ type: "success", content: "New task added..." });
-         
-        setAllTask(previousData => previousData ? [...previousData, response] : [response]);
-        
-        setTask("");
-        setDescription("");
-        setDate(null);
-        setPriority("1");
-        setProjecctId(allProject.length > 0 ? allProject[0]["id"] : "");
-        setAddTaskModel(false);
-      })
-      .catch(error => {
-        messageApi.open({ type: "error", content: "Not able to add task..." })
-      })
-
+    handleCancel();
 
   }
 
@@ -86,23 +95,24 @@ function AddTask({ addTaskModel, setAddTaskModel }) {
       {contextHolder}
       <div className='flex flex-col gap-2'>
         <div className='shadow-xs'>
-          <input
+          <Input
             type="text"
             value={task}
             placeholder='Add new Task'
             onChange={(e) => setTask(e.target.value)}
-            className=' font-black text-lg p-1 focus:outline-none'
+            maxLength="30"
           />
           <span ref={dateInput} className=' w-fit p-1 font-bold text-md'></span>
           <span ref={datePriority} className=' w-fit p-1 font-bold text-md'></span>
         </div>
 
-        <textarea
+        <TextArea
           value={description}
           placeholder='Task description'
           onChange={(e) => setDescription(e.target.value)}
-          className='font-normal text-sm shadow-xs focus:outline-none h-5'
-        ></textarea>
+          autoSize={{ minRows: 2, maxRows: 6 }}
+          maxLength="300"
+        ></TextArea>
 
         <div className='flex gap-2'>
           <DatePicker onChange={handelDate} format="YYYY-MM-DD" />
@@ -131,7 +141,12 @@ function AddTask({ addTaskModel, setAddTaskModel }) {
 
           <div className='flex gap-2'>
             <Button onClick={handleCancel}>Cancel</Button>
-            <Button style={{ background: "red", color: "white", fontWeight: "900" }} onClick={handleAddTask} disabled={task.trim() === ""}>Add Task</Button>
+            <Button
+              style={{ background: "red", color: "white", fontWeight: "900" }}
+              onClick={handleAddTask} disabled={task.trim() === ""}
+              ref={addTaskBuuton}
+            >
+              Add Task</Button>
           </div>
         </div>
       </div>
