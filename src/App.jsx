@@ -2,7 +2,7 @@ import { createContext, useEffect, useState } from 'react'
 
 import Sidebar from './components/Sidebar'
 import Content from './components/Content'
-import { message, Splitter } from 'antd';
+import { message } from 'antd';
 import getProject from './service/project/getProject';
 import getTask from './service/task/getTask';
 
@@ -17,7 +17,7 @@ function App() {
   const [allTask, setAllTask] = useState(null);
 
   useEffect(() => {
-    
+
     getProject()
       .then(response => {
         setProjects(response);
@@ -33,7 +33,7 @@ function App() {
       .catch(() => {
         messageApi.open({ type: 'error', content: 'Not able fetch the task.' })
       })
-  },[]);
+  }, []);
 
   const Details = {
     projects,
@@ -52,16 +52,10 @@ function App() {
     <dataContext.Provider value={Details}>
 
       {contextHolder}
-      <Splitter style={{ height: '100vh' }}>
-      <Splitter.Panel defaultSize="30%" min="10%" max="50%">
-          <Sidebar />
-        </Splitter.Panel>
-
-        <Splitter.Panel defaultSize="70%" min="50%" max="90%">
-          <Content />
-        </Splitter.Panel>
-
-      </Splitter>
+      <div className='flex'>
+        <Sidebar />
+        <Content />
+      </div>
     </dataContext.Provider>
   )
 }
