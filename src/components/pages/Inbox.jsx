@@ -73,13 +73,13 @@ export default function Inbox() {
               <div>
                 {
                   filteredAllTask.map(task => {
-                    return <div className='flex gap-3 m-2 justify-between max-w-[650px] border border-gray-300 rounded-2xl p-3 px-5' key={task["id"]}>
+                    return <div className='flex gap-3 m-2 justify-between max-w-[650px] border min-w-[300px] border-gray-300 rounded-2xl p-3 px-5' key={task["id"]}>
                       <div className='flex gap-5'>
                         <Checkbox onChange={() => { handelCompleteTask(task["id"]) }} />
                         <div className="flex flex-col gap-1">
-                          <p className='text-xs p-1 font-bold'>{task["content"]}</p>
-                          <p className='text-xs'>{task["description"]}</p>
-                          <p className='text-xs opacity-60'>{task?.due?.date}</p>
+                          <p className='text-xs py-1 font-bold'>{task["content"]}</p>
+                          <p className='text-[15px]'>{task["description"]}</p>
+                          <p className='text-[10px] opacity-60'>{task?.due?.date}</p>
                         </div>
                       </div>
                       <div className='flex gap-5 items-center'>

@@ -8,6 +8,7 @@ import {
   EllipsisOutlined,
   FilterFilled,
   InboxOutlined,
+  MenuOutlined,
   PlusCircleOutlined,
   PlusOutlined,
   RightOutlined,
@@ -30,6 +31,7 @@ export default function Sidebar() {
 
   const navigate = useNavigate();
   const [messageApi, contextHolder] = useMessage();
+  const [collapsed, setCollapsed] = useState(false)
   const [showProjects, setShowProjects] = useState(false);
   const [showFavorites, setShowFavorites] = useState(true);
   const [addTaskModel, setAddTaskModel] = useState(false);
@@ -155,59 +157,90 @@ export default function Sidebar() {
 
   return (
     <Sider
-      width="100%"
-      style={{ minHeight: "100vh", position: "relative", backgroundColor: "rgb(248,219,158,0.1)", paddingLeft: "20px" }}
+      width={250}
+      collapsible
+      trigger={null}
+      collapsedWidth={0}
+      breakpoint='md'
+      onBreakpoint={(broken) => { setCollapsed(broken) }}
+      collapsed={collapsed}
+      style={{ minHeight: "100vh", backgroundColor: "rgb(248,219,158,0.1)", paddingLeft: collapsed ? "0px" : "20px" }}
     >
 
       {contextHolder}
-      <Menu
-        defaultSelectedKeys={["1"]}
+      <Button
+        type='text'
+        onClick={() => setCollapsed(pre => !pre)}
+        icon={<MenuOutlined />}
         style={{
-          marginTop: 50,
-          backgroundColor: "transparent",
-          fontSize: "16px"
+          position: "absolute",
+          transition: "left 0.3s ease",
+          left: collapsed ? 10 : 210,
+          zIndex: 1000,
+          fontSize: "18px",
+          width: 40,
+          height: 40,
+          background: "transparent",
+
         }}
-        items={item}
-      >
-      </Menu>
-      {
-        favoritesProject.length > 0 &&
-        <div>
-          <div className='flex  justify-between items-center mt-4'>
-            <p className='opacity-75 text-sm p-2'>Favorites</p>
+      />
+      {!collapsed &&
+        <>
+          <div className='flex gap-2 py-3'>
+            <div className='rounded-full border bg-green-800 border-white px-1.5 w-5 h-5'>
+              <p className='text-white font-bold'>s</p>
+            </div>
+            <p>shivask94423 <DownOutlined style={{padding: "2px", opacity: "60%"}}/></p>
+          </div>
+          <Menu
+            defaultSelectedKeys={["1"]}
+            style={{
+              backgroundColor: "transparent",
+              fontSize: "16px"
+            }}
+            items={item}
+          >
+          </Menu>
+          {
+            favoritesProject.length > 0 &&
+            <div>
+              <div className='flex  justify-between items-center mt-4'>
+                <p className='opacity-75 text-sm p-2'>Favorites</p>
+                <Button
+                  type='text'
+                  onClick={() => setShowFavorites(pre => !pre)}
+                >
+                  {showFavorites ? <DownOutlined /> : <RightOutlined />}
+                </Button>
+              </div>
+              {favoritesProject.length > 0 && showFavorites && <Menu items={favoritesItems} style={{ backgroundColor: "transparent", }}></Menu>}
+
+            </div>
+          }
+
+          <div className='flex items-center mt-4'>
+            <div className='flex justify-between w-full'>
+              <div
+                className='font-bold text-sm p-2 cursor-pointer'
+                onClick={() => { navigate("/project"); setSelectedProject(null) }}
+              >
+                My Projects
+              </div>
+              <PlusOutlined onClick={() => { setNewProject(true) }} />
+            </div>
             <Button
               type='text'
-              onClick={() => setShowFavorites(pre => !pre)}
+              onClick={() => setShowProjects(pre => !pre)}
             >
-              {showFavorites ? <DownOutlined /> : <RightOutlined />}
+              {showProjects ? <DownOutlined /> : <RightOutlined />}
             </Button>
-          </div>
-          {favoritesProject.length > 0 && showFavorites && <Menu items={favoritesItems} style={{ backgroundColor: "transparent", }}></Menu>}
 
-        </div>
+          </div>
+
+          {inboxProject.length > 0 && showProjects && <Menu items={projectItems} style={{ backgroundColor: "transparent", }} > </Menu>}
+
+        </>
       }
-
-      <div className='flex items-center mt-4'>
-        <div className='flex justify-between w-full'>
-          <div
-            className='font-bold text-sm p-2 cursor-pointer'
-            onClick={() => { navigate("/project"); setSelectedProject(null) }}
-          >
-            My Projects
-          </div>
-          <PlusOutlined onClick={() => { setNewProject(true) }} />
-        </div>
-        <Button
-          type='text'
-          onClick={() => setShowProjects(pre => !pre)}
-        >
-          {showProjects ? <DownOutlined /> : <RightOutlined />}
-        </Button>
-
-      </div>
-
-      {inboxProject.length > 0 && showProjects && <Menu items={projectItems} style={{ backgroundColor: "transparent", }} > </Menu>}
-
       <AddTaskModel addTaskModel={addTaskModel} setAddTaskModel={setAddTaskModel} />
       <DeletProject SelectedDeleteProject={SelectedDeleteProject} setDeleteProject={setDeleteProject} setProjects={setProjects} />
       <AddProject newProject={newProject} setNewProject={setNewProject} />
