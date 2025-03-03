@@ -61,7 +61,7 @@ export default function Inbox() {
   }
 
   return (
-    <div className="mx-[10%]">
+    <div className="mx-auto min-w-[350px]">
 
       {contextHolder}
       <div>
@@ -82,7 +82,7 @@ export default function Inbox() {
                           <p className='text-[10px] opacity-60'>{task?.due?.date}</p>
                         </div>
                       </div>
-                      <div className='flex gap-5 items-center'>
+                      <div className='flex flex-col gap-2 md:flex-row md:gap-5 items-center'>
                         <Button onClick={() => { setChangeProject(task) }}>move</Button>
                         <EditOutlined onClick={() => { setEditTask(task) }} />
                         <DeleteOutlined onClick={() => { handelDeleteTask(task["id"]) }} />
