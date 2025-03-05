@@ -2,12 +2,15 @@ import { Button, Modal, Switch } from 'antd'
 import useMessage from 'antd/es/message/useMessage';
 import { useEffect, useRef, useState } from 'react'
 import updateProject from '../../service/project/updateProject';
+import { useDispatch } from 'react-redux';
+import { updateProject as updateProjectStore } from '../../slices/projectSlices';
 
-function EditProject({ editProject, setEditProjecct, setProjects }) {
+function EditProject({ editProject, setEditProjecct }) {
     const [projectName, setProjectName] = useState("");
     const [isFavorite, setIsFavorite] = useState(false);
     const [messageApi, contextHolder] = useMessage();
     const editButton = useRef();
+    const dispatch = useDispatch();
 
     useEffect(() => {
         if (editProject) {
@@ -17,13 +20,12 @@ function EditProject({ editProject, setEditProjecct, setProjects }) {
         }
     }, [editProject]);
 
-
     async function handelOK() {
 
         try {
             editButton.current.disabled = true;
             let updatedProject = await updateProject({ ...editProject, name: `${projectName}`, is_favorite: isFavorite });
-            setProjects(previousProjects => previousProjects.map(project => project["id"] == editProject["id"] ? updatedProject : project ))
+            dispatch(updateProjectStore(updatedProject));
             messageApi.open({ type: "success", content: "Successfull changed name." })
         }
         catch {

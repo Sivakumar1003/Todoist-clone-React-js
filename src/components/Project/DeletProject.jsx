@@ -2,11 +2,14 @@ import { Button, Modal } from 'antd'
 import useMessage from 'antd/es/message/useMessage'
 import { useEffect, useRef } from 'react'
 import deleteProject from '../../service/project/deleteProject';
+import { useDispatch } from 'react-redux';
+import { deleteProject as deleteProjectStore } from '../../slices/projectSlices';
 
-function DeletProject({ SelectedDeleteProject, setDeleteProject, setProjects }) {
+function DeletProject({ SelectedDeleteProject, setDeleteProject }) {
 
   const [messageApi, contextHolder] = useMessage();
   const deleteButton = useRef();
+  const dispatch = useDispatch();
 
   useEffect(() => {
     if (SelectedDeleteProject) {
@@ -23,7 +26,7 @@ function DeletProject({ SelectedDeleteProject, setDeleteProject, setProjects }) 
     deleteButton.current.disabled = true;
     try {
       await deleteProject((SelectedDeleteProject["id"]));
-      setProjects(previousProjeccts => previousProjeccts.filter(project => project["id"] !== SelectedDeleteProject["id"]));
+      dispatch(deleteProjectStore(SelectedDeleteProject["id"]));
       messageApi.open({ type: "success", content: "Project deleted successfully." })
     }
     catch {

@@ -1,20 +1,21 @@
 import { Button, Input, Modal, Switch } from 'antd'
-import { useContext, useEffect, useRef, useState } from 'react'
-import { dataContext } from '../../App';
+import { useEffect, useRef, useState } from 'react'
 import useMessage from 'antd/es/message/useMessage';
 import addProject from '../../service/project/addProject';
+import { useDispatch } from 'react-redux';
+import { addProject as addProjectStore } from '../../slices/projectSlices';
 
 function AddProject({ newProject, setNewProject }) {
 
-    const { setProjects } = useContext(dataContext);
     const [messageApi, contextHolder] = useMessage();
     const okButton = useRef();
     const [projectName, setProjectName] = useState("");
     const [isFavorite, setIsFavorite] = useState(false);
+    const dispatch = useDispatch();
 
     useEffect(() => {
-        if(newProject) {
-        okButton.current.disabled = false;
+        if (newProject) {
+            okButton.current.disabled = false;
         }
     }, [newProject])
 
@@ -27,13 +28,13 @@ function AddProject({ newProject, setNewProject }) {
     async function handelOK() {
 
         okButton.current.disabled = true;
-        const  project = {
+        const project = {
             name: projectName,
-            is_favorite: isFavorite 
+            is_favorite: isFavorite
         }
         try {
             let newProject = await addProject(project);
-            setProjects(previousProjects => [...previousProjects, newProject]);
+            dispatch(addProjectStore(newProject))
             messageApi.open({ type: "success", content: "Project added successfully." })
         }
         catch {

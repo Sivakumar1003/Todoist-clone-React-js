@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   BorderOuterOutlined,
@@ -15,20 +15,21 @@ import {
   SearchOutlined
 } from '@ant-design/icons';
 import { Button, Layout, Menu, Popover } from 'antd';
-import { dataContext } from '../App';
 import AddTaskModel from './Task/AddTaskModel';
 import useMessage from 'antd/es/message/useMessage';
 import DeletProject from './Project/DeletProject';
 import AddProject from './Project/AddProject';
 import EditProject from './Project/EditProject';
 import updateProject from '../service/project/updateProject';
-const { Sider } = Layout;
+import { useDispatch, useSelector } from 'react-redux';
+import { addSelectedProject, removeSelectedProject } from '../slices/selectedProject';
+import { updateProject as updateProjectStore } from '../slices/projectSlices';
 
+const { Sider } = Layout;
 
 export default function Sidebar() {
 
-  const { projects, setSelectedProject, setProjects } = useContext(dataContext);
-
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const [messageApi, contextHolder] = useMessage();
   const [collapsed, setCollapsed] = useState(false)
@@ -38,7 +39,7 @@ export default function Sidebar() {
   const [newProject, setNewProject] = useState(false);
   const [SelectedDeleteProject, setDeleteProject] = useState(null);
   const [editProject, setEditProjecct] = useState("");
-
+  const projects = useSelector(state => state.projects);
 
   const item = [
     { key: "add-task", onClick: () => { setAddTaskModel(true) }, icon: <PlusCircleOutlined />, label: "Add Task", style: { color: "red", fontWeight: 900 } },
@@ -48,7 +49,6 @@ export default function Sidebar() {
     { key: "upcoming", icon: <BorderOuterOutlined />, label: "Upcoming" },
     { key: "filters-labels", icon: <FilterFilled />, label: "Filters & Labels" },
     { key: "completed", icon: <CheckCircleOutlined />, label: "Completed" },
-
   ]
 
   const inboxProject = [];
@@ -68,7 +68,6 @@ export default function Sidebar() {
           :
           <Button onClick={() => { addFavrites(project) }}>Add to Favorite</Button>
       }
-
       <Button onClick={() => { setEditProjecct(project) }}>Edit</Button>
       <Button onClick={() => { setDeleteProject(project) }}>Delete</Button>
     </div>
@@ -79,7 +78,7 @@ export default function Sidebar() {
       key: `${project["id"]}`,
       onClick: () => {
         navigate("/project");
-        setSelectedProject(project)
+        dispatch(addSelectedProject(project))
       },
       label: (
         <span
@@ -99,10 +98,9 @@ export default function Sidebar() {
   })
 
   async function addFavrites(project) {
-
     try {
       let updatedproject = await updateProject({ ...project, is_favorite: true });
-      setProjects(previousProject => previousProject.map(eachProject => eachProject["id"] == project["id"] ? updatedproject : eachProject));
+      dispatch(updateProjectStore(updatedproject));
       messageApi.open({ type: "success", content: "Added to favorites." });
     }
     catch {
@@ -113,7 +111,7 @@ export default function Sidebar() {
   async function removeFavorites(project) {
     try {
       let updatedproject = await updateProject({ ...project, is_favorite: false });
-      setProjects(previousProject => previousProject.map(eachProject => eachProject["id"] == project["id"] ? updatedproject : eachProject));
+      dispatch(updateProjectStore(updatedproject));
       messageApi.open({ type: "success", content: "Removed from favorites." })
     }
     catch {
@@ -136,7 +134,7 @@ export default function Sidebar() {
       key: `${project["id"]}`,
       onClick: () => {
         navigate("/project"),
-          setSelectedProject(project)
+          dispatch(addSelectedProject(project))
       },
       label: (
         <span
@@ -166,7 +164,6 @@ export default function Sidebar() {
       collapsed={collapsed}
       style={{ minHeight: "100vh", backgroundColor: "rgb(248,219,158,0.1)", paddingLeft: collapsed ? "0px" : "20px" }}
     >
-
       {contextHolder}
       <Button
         type='text'
@@ -190,7 +187,7 @@ export default function Sidebar() {
             <div className='rounded-full border bg-green-800 border-white px-1.5 w-5 h-5'>
               <p className='text-white font-bold'>s</p>
             </div>
-            <p>shivask94423 <DownOutlined style={{padding: "2px", opacity: "60%"}}/></p>
+            <p>shivask94423 <DownOutlined style={{ padding: "2px", opacity: "60%" }} /></p>
           </div>
           <Menu
             defaultSelectedKeys={["1"]}
@@ -222,7 +219,7 @@ export default function Sidebar() {
             <div className='flex justify-between w-full'>
               <div
                 className='font-bold text-sm p-2 cursor-pointer'
-                onClick={() => { navigate("/project"); setSelectedProject(null) }}
+                onClick={() => { navigate("/project"); dispatch(removeSelectedProject(null)) }}
               >
                 My Projects
               </div>
@@ -234,17 +231,14 @@ export default function Sidebar() {
             >
               {showProjects ? <DownOutlined /> : <RightOutlined />}
             </Button>
-
           </div>
-
           {inboxProject.length > 0 && showProjects && <Menu items={projectItems} style={{ backgroundColor: "transparent", }} > </Menu>}
-
         </>
       }
       <AddTaskModel addTaskModel={addTaskModel} setAddTaskModel={setAddTaskModel} />
-      <DeletProject SelectedDeleteProject={SelectedDeleteProject} setDeleteProject={setDeleteProject} setProjects={setProjects} />
+      <DeletProject SelectedDeleteProject={SelectedDeleteProject} setDeleteProject={setDeleteProject} />
       <AddProject newProject={newProject} setNewProject={setNewProject} />
-      <EditProject editProject={editProject} setEditProjecct={setEditProjecct} setProjects={setProjects} />
+      <EditProject editProject={editProject} setEditProjecct={setEditProjecct} />
     </Sider>
   )
 }

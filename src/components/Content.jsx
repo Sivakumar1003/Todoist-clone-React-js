@@ -2,8 +2,6 @@ import { Route, Routes } from 'react-router-dom'
 import Inbox from './pages/Inbox'
 import Projects from './pages/Projects'
 
-
-
 export default function Content() {
   return (
     <div className='mt-10 w-full'>

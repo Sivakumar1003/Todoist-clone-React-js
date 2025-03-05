@@ -1,15 +1,17 @@
 import { Button, DatePicker, Input, Modal, Select } from 'antd'
-import { useContext, useEffect, useRef, useState } from 'react'
-import { dataContext } from '../../App';
+import { useEffect, useRef, useState } from 'react'
 import useMessage from 'antd/es/message/useMessage';
 import addTask from '../../service/task/addTask';
 import TextArea from 'antd/es/input/TextArea';
+import { useDispatch, useSelector } from 'react-redux';
+import { addTask as addTaskStore } from '../../slices/taskSlices';
 
 function AddTask({ addTaskModel, setAddTaskModel }) {
 
-  const { projects, setAllTask } = useContext(dataContext)
   const [messageApi, contextHolder] = useMessage();
   const addTaskBuuton = useRef();
+  const projects = useSelector(state => state.projects);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     if(addTaskModel) {
@@ -28,11 +30,9 @@ function AddTask({ addTaskModel, setAddTaskModel }) {
   const [description, setDescription] = useState("");
   const [date, setDate] = useState(null);
   const [priority, setPriority] = useState("1");
-  const [projectId, setProjecctId] = useState(allProject.length > 0 ? allProject[0]["id"] : "")
-
+  const [projectId, setProjecctId] = useState(allProject.length > 0 ? allProject[0]["id"] : "");
   const dateInput = useRef();
   const datePriority = useRef();
-
 
   function handelDate(_, dateString) {
     dateInput.current.textContent = dateString;
@@ -49,35 +49,27 @@ function AddTask({ addTaskModel, setAddTaskModel }) {
   }
 
   async function handleAddTask() {
-
     let deefaultDate = new Date;
     let currentDay = Number(deefaultDate.getDate());
     let month = Number(deefaultDate.getMonth());
     let year = deefaultDate.getFullYear();
-
     const newTask = {
       "content": task,
       "description": description,
       "due_date": date || `${year}-${month < 10 ? "0" + month : month}-${currentDay < 10 ? "0" + currentDay : currentDay}`,
       "priority": priority,
       "project_id": projectId,
-    }
-    
+    } 
     addTaskBuuton.current.disabled = true;
-    
     try {
       let taskAdded = await addTask(newTask);
       messageApi.open({ type: "success", content: "task added successfully." });
-      setAllTask(pre => {
-        return [...pre, taskAdded]
-      });
+      dispatch(addTaskStore(taskAdded));
     }
     catch {
       messageApi.open({ type: "error", content: "task not able to add." })
     }
-
     handleCancel();
-
   }
 
 

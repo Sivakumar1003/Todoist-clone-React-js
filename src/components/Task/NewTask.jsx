@@ -1,15 +1,21 @@
 import { Button, DatePicker, Input, Select } from 'antd'
-import { useContext, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import useMessage from 'antd/es/message/useMessage';
-import { dataContext } from '../../App';
 import addTask from '../../service/task/addTask';
 import TextArea from 'antd/es/input/TextArea';
+import { useDispatch } from 'react-redux';
+import { addTask as addTaskStore } from '../../slices/taskSlices';
 
 
 function NewTask({ selectedProject, setNewTask }) {
 
-    const { setAllTask } = useContext(dataContext)
     const [messageApi, contextHolder] = useMessage();
+    const dispatch = useDispatch();
+    const [task, setTask] = useState("");
+    const [description, setDescription] = useState("");
+    const [date, setDate] = useState(null);
+    const [priority, setPriority] = useState("1");
+    const projectId = selectedProject["id"];
     const addTaskBuuton = useRef();
     const dateInput = useRef();
     const datePriority = useRef();
@@ -17,17 +23,6 @@ function NewTask({ selectedProject, setNewTask }) {
     useEffect(() => {
         addTaskBuuton.current.disabled = false;
     }, [selectedProject])
-
-    const [task, setTask] = useState("");
-    const [description, setDescription] = useState("");
-    const [date, setDate] = useState(null);
-    const [priority, setPriority] = useState("1");
-    const projectId = selectedProject["id"];
-
-    function handelDate(dateObj, dateString) {
-        dateInput.current.textContent = dateString;
-        setDate(dateString);
-    }
 
     function handelDate(_, dateString) {
         dateInput.current.textContent = dateString;
@@ -47,15 +42,12 @@ function NewTask({ selectedProject, setNewTask }) {
         setNewTask(false);
     }
 
-
-
     async function handleAddTask() {
 
         let deefaultDate = new Date;
         let currentDay = Number(deefaultDate.getDate());
         let month = Number(deefaultDate.getMonth());
         let year = deefaultDate.getFullYear();
-
         const newTask = {
             "content": task,
             "description": description,
@@ -63,21 +55,16 @@ function NewTask({ selectedProject, setNewTask }) {
             "priority": priority,
             "project_id": projectId,
         }
-
         addTaskBuuton.current.disabled = true;
-
         try {
             let taskAdded = await addTask(newTask);
+            dispatch(addTaskStore(taskAdded));
             messageApi.open({ type: "success", content: "task added successfully." });
-            setAllTask(pre => {
-                return [...pre, taskAdded]
-            });
         }
         catch {
             messageApi.open({ type: "error", content: "task not able to add." })
         }
         handleCancel();
-
     }
 
 
@@ -124,10 +111,10 @@ function NewTask({ selectedProject, setNewTask }) {
 
                 <div className='flex gap-2'>
                     <Button onClick={handleCancel}>Cancel</Button>
-                    <Button 
-                    style={{ background: "red", color: "white", fontWeight: "900" }} 
-                    onClick={handleAddTask} disabled={task.trim() === ""}
-                    ref={addTaskBuuton}
+                    <Button
+                        style={{ background: "red", color: "white", fontWeight: "900" }}
+                        onClick={handleAddTask} disabled={task.trim() === ""}
+                        ref={addTaskBuuton}
                     >
                         Add Task</Button>
                 </div>

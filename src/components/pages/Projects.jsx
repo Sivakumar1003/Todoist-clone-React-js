@@ -1,5 +1,4 @@
-import  { useContext, useState } from 'react'
-import { dataContext } from '../../App'
+import  { useState } from 'react'
 import { Button, Checkbox } from 'antd';
 import { DeleteOutlined, EditOutlined, PlusCircleFilled } from '@ant-design/icons';
 import NewTask from '../Task/NewTask';
@@ -8,16 +7,21 @@ import EditTask from '../Task/EditTask';
 import MoveTask from '../Task/MoveTask';
 import deleteTask from '../../service/task/deleteTask';
 import completeTask from '../../service/task/completeTask';
+import { useDispatch, useSelector } from 'react-redux';
+import { addSelectedProject } from '../../slices/selectedProject';
+import { deleteTask as deleteTaskStore, completeTask as completeTaskStore } from "../../slices/taskSlices";
 
 function Projects() {
 
-  const { selectedProject, projects, setSelectedProject, allTask, setAllTask } = useContext(dataContext);
   const [newTask, setNewTask] = useState(false);
   const [messageApi, contextHolder] = useMessage();
   const [editTask, setEditTask] = useState("");
   const [changeProject, setChangeProject] = useState("");
-
-
+  const dispatch = useDispatch();
+  const selectedProject = useSelector(state => state.selectedProject)
+  const projects = useSelector(state => state.projects)
+  const allTask = useSelector(state => state.task)
+  
   const allProject = [];
   if (projects && Array.isArray(projects)) {
     projects.forEach(project => {
@@ -28,7 +32,6 @@ function Projects() {
   }
 
   const filteredAllTask = [];
-
   if (selectedProject && allTask) {
     let id = selectedProject["id"];
     allTask.forEach(task => {
@@ -41,9 +44,7 @@ function Projects() {
   async function handelDeleteTask(id) {
     try {
       await deleteTask(id);
-      setAllTask(previousTask => {
-        return previousTask.filter(task => task["id"] !== id);
-      })
+      dispatch(deleteTaskStore(id));
       messageApi.open({ type: "success", content: "task deleted sucessfully..." })
     }
     catch {
@@ -54,9 +55,7 @@ function Projects() {
   async function handelCompleteTask(id) {
     try {
       await completeTask(id);
-      setAllTask(previousTask => {
-        return previousTask.map(task => task["id"] === id ? {...task, is_completed: true} : task)
-      })
+      dispatch(completeTaskStore(id));
       messageApi.open({ type: "success", content: "Completed sucessfully..." })
     }
     catch {
@@ -121,7 +120,7 @@ function Projects() {
             {
               allProject.length > 0 &&
               allProject.map(project => {
-                return <div key={project["id"]} className='p-2 w-fit cursor-pointer' onClick={() => { setSelectedProject(project) }}>
+                return <div key={project["id"]} className='p-2 w-fit cursor-pointer' onClick={() => { dispatch(addSelectedProject(project)) }}>
                   {project["name"]}
                 </div>
               })
@@ -130,7 +129,7 @@ function Projects() {
         </div>
       }
       <EditTask editTask={editTask} setEditTask={setEditTask}/>
-      <MoveTask changeProject={changeProject} setChangeProject={setChangeProject} projects={projects} setAllTask={setAllTask} />
+      <MoveTask changeProject={changeProject} setChangeProject={setChangeProject} />
     </div>
   )
 }

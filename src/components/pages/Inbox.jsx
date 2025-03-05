@@ -1,5 +1,3 @@
-import { useContext, useState } from "react";
-import { dataContext } from "../../App";
 import useMessage from "antd/es/message/useMessage";
 import { Button, Checkbox } from "antd";
 import { DeleteOutlined, EditOutlined, PlusCircleFilled } from "@ant-design/icons";
@@ -8,16 +6,19 @@ import EditTask from "../Task/EditTask";
 import MoveTask from "../Task/MoveTask";
 import deleteTask from "../../service/task/deleteTask";
 import completeTask from "../../service/task/completeTask";
-
+import { useDispatch, useSelector } from "react-redux";
+import { useState } from "react";
+import { deleteTask as deleteTaskStore, completeTask as completeTaskStore } from "../../slices/taskSlices";
 
 export default function Inbox() {
 
-
-  const { projects, allTask, setAllTask } = useContext(dataContext);
   const [newTask, setNewTask] = useState(false);
   const [messageApi, contextHolder] = useMessage();
   const [editTask, setEditTask] = useState("");
   const [changeProject, setChangeProject] = useState("");
+  const projects = useSelector(state => state.projects);
+  const allTask = useSelector(state => state.task);
+  const dispatch = useDispatch();
 
   let inboxProject;
   if (projects && Array.isArray(projects)) {
@@ -37,9 +38,7 @@ export default function Inbox() {
   async function handelDeleteTask(id) {
     try {
       await deleteTask(id);
-      setAllTask(previousTask => {
-        return previousTask.filter(task => task["id"] !== id);
-      })
+      dispatch(deleteTaskStore(id));
       messageApi.open({ type: "success", content: "task deleted sucessfully..." })
     }
     catch {
@@ -50,9 +49,7 @@ export default function Inbox() {
   async function handelCompleteTask(id) {
     try {
       await completeTask(id);
-      setAllTask(previousTask => {
-        return previousTask.map(task => task["id"] === id ? {...task, is_completed: true} : task)
-      })
+      dispatch(completeTaskStore(id));
       messageApi.open({ type: "success", content: "Completed sucessfully..." })
     }
     catch {
@@ -110,7 +107,7 @@ export default function Inbox() {
 
       </div>
       <EditTask editTask={editTask} setEditTask={setEditTask} />
-      <MoveTask changeProject={changeProject} setChangeProject={setChangeProject} projects={projects} setAllTask={setAllTask} />
+      <MoveTask changeProject={changeProject} setChangeProject={setChangeProject} />
     </div>
   )
 }

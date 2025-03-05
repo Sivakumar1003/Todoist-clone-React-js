@@ -1,24 +1,24 @@
 import { Button, DatePicker, Input, Modal, Select } from 'antd'
 import useMessage from 'antd/es/message/useMessage';
-import { useContext, useEffect, useRef, useState } from 'react'
-import { dataContext } from '../../App';
+import { useEffect, useRef, useState } from 'react'
 import updateTask from '../../service/task/updateTask';
 import TextArea from 'antd/es/input/TextArea';
+import { useDispatch, useSelector } from 'react-redux';
+import { updateTask as updateTaskStore } from '../../slices/taskSlices';
 
 function EditTask({ editTask, setEditTask }) {
 
 
-  const { projects, setAllTask } = useContext(dataContext)
   const [messageApi, contextHolder] = useMessage();
-
-  const dateInput = useRef();
-  const datePriority = useRef();
-  const editButton = useRef();
-
+  const projects = useSelector(state => state.projects);
+  const dispatch = useDispatch();
   const [task, setTask] = useState("");
   const [description, setDescription] = useState("");
   const [date, setDate] = useState(null);
   const [priority, setPriority] = useState("1");
+  const dateInput = useRef();
+  const datePriority = useRef();
+  const editButton = useRef();
 
   useEffect(() => {
     if (editTask) {
@@ -58,18 +58,15 @@ function EditTask({ editTask, setEditTask }) {
       due_date: date,
       priority: priority
     }
-
     editButton.current.disabled = true;
-
     try {
       let updatedTask = await updateTask(newTask, editTask["id"]);
-      setAllTask(previousTask => previousTask.map(task => task["id"] == editTask["id"] ? updatedTask : task))
+      dispatch(updateTaskStore(updatedTask));
       messageApi.open({ type: "success", content: "Successfully changed." })
     }
     catch {
       messageApi.open({ type: "error", content: "Not able to change." })
     }
-
     handelCancel();
   }
 
