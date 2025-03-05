@@ -15,7 +15,7 @@ This is a **Todoist Clone** built using **React.js** and **Tailwind CSS**. The a
 
 ## 🛠 Tech Stack
 - **Frontend**: React.js, Tailwind CSS, Ant Design
-- **State Management**: React Context API
+- **State Management**: react-redux, reduxjs/toolkit
 - **Deployment**: Vercel
 
 ## 📂 Project Structure
