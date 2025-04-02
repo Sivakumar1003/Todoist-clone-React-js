@@ -4,9 +4,7 @@ This is a **Todoist Clone** built using **React.js**, **Ant Design** and **Tailw
 
 ## 🚀 Live Demo
 
-🔗 master branch [Todoist Clone](#)
-
-🔗 withRedux branch [Todoist Clone](#)
+🔗 master branch [Todoist Clone](https://todoist-clone-react-js.vercel.app/)
 
 ## 📂 Project Structure
 ```
