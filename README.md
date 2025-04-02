@@ -1,66 +1,89 @@
 # Todoist Clone
 
-This is a **Todoist Clone** built using **React.js** and **Tailwind CSS**. The application allows users to manage tasks, projects, and favorites without requiring a backend or database.
+This is a **Todoist Clone** built using **React.js**, **Ant Design**, **Redux** and **Tailwind CSS**. The application allows users to manage tasks, projects, and favorites without requiring a backend or database.
 
 ## 🚀 Live Demo
-🔗 [Todoist Clone](https://todoist-theta-ten.vercel.app/)
 
-## 📌 Features
-- ✅ **Task Management** - Add, edit, and delete tasks.
-- ⭐ **Favorites** - Mark projects as favorites for quick access.
-- 📂 **Projects** - Organize tasks into different projects.
-- 🎨 **Responsive UI** - Built with **Tailwind CSS** for a clean and modern design.
-- ⚡ **Ant Design UI Components** - Used for enhanced user experience.
-- 🔄 **State Management** - Managed with React's `useState` and `useContext`.
-
-## 🛠 Tech Stack
-- **Frontend**: React.js, Tailwind CSS, Ant Design
-- **State Management**: react-redux, reduxjs/toolkit
-- **Deployment**: Vercel
+🔗 master branch [Todoist Clone](https://todoist-clone-react-js.vercel.app/)
 
 ## 📂 Project Structure
 ```
-📦 todoist-clone
-├── 📁 public         # Static assets
-├── 📁 src           # Main source code
-│   ├── 📁 components # Reusable components
-│   ├── 📁 pages      # Main pages (Inbox, Projects, etc.)
-│   ├── 📁 service    # Service functions for data updates
-│   ├── App.js       # Main app entry point
-│   ├── index.js     # React DOM render entry
-│   └── styles.css   # Global styles
-└── package.json     # Dependencies & scripts
+todoist-clone-react-js/ 
+├── public/ # Static assets 
+├── src/ # Source code 
+│ ├── components/ # Reusable React components 
+│ │ ├── pages/ # Page-level components 
+│ │ ├── Task/ # Task based components 
+│ │ └── Project/ # Project based components 
+| ├── service/ # API requests
+| │ ├── Project/ # Project based API request
+| │ └── Task/ # Task based API request
+| ├── config/ # Redux store
+| ├── slices/ # slices for store
+│ ├── index.css # CSS and styling files 
+│ ├── App.jsx # Root component managing application structure 
+│ ├── main.jsx # Entry point for rendering the app 
+├── .gitignore # Specifies files to ignore in version control 
+├── package.json # Project dependencies and scripts 
+├── vite.config.js # Vite configuration settings 
+├── README.md # Project documentation
 ```
 
-## 🚀 Getting Started
-### 1️⃣ Clone the repository
-```sh
-git clone https://github.com/yourusername/todoist-clone.git
-cd todoist-clone
-```
+## 🚀 Technologies Used
 
-### 2️⃣ Install dependencies
-```sh
-npm install
-```
+- **React.js**: JavaScript library for building user interfaces.
+- **Tailwind CSS**: Utility-first CSS framework for rapid UI development.
+- **Ant Design**: UI library providing pre-built components for enhanced user experience.
+- **Redux**: Manages global store across the application.
+- **Vite**: Next-generation frontend tooling for fast development and build processes.
 
-### 3️⃣ Run the development server
-```sh
-npm run dev
-```
-The app will be available at `http://localhost:5173/`
+## 📱 Responsive Design
 
-## 📦 Deployment
-This project is deployed on **Vercel**.
-To deploy manually:
-```sh
-vercel --prod
-```
+- **Mobile-First Approach**: Ensures optimal user experience on smaller screens.
+- **Flexbox & Grid Layouts**: Provides flexible and adaptive component positioning.
+- **Media Queries**: Adjusts styles based on device screen sizes.
+- **Ant Design Components**: Responsive by default, enhancing consistency across devices.
 
-## 🎯 Future Enhancements
-- [ ] Drag & Drop for tasks
-- [ ] Dark Mode
-- [ ] Task Reminders
+## 🔥 Features
+
+- **Task Management**: Add, edit, and delete tasks seamlessly.
+- **Project Organization**: Categorize tasks into specific projects for better organization.
+- **Favorites**: Mark projects as favorites for quick and easy access.
+- **State Management**: Utilizes React's `useState` and `useContext` for efficient state handling.
+- **Responsive UI**: Adapts to various screen sizes, ensuring usability across devices.
+- **Ant Design Integration**: Leverages Ant Design components for a polished and consistent UI.
+
+## 🛠 Installation & Setup
+Follow these steps to set up the project on your local machine:
+
+1. **Clone the repository**:
+   ```
+   git clone https://github.com/Sivakumar1003/Todoist-clone-React-js.git
+   ```
+2. **Navigate to the project directory**:
+    ```
+    cd Todoist-clone-React-js
+    ```
+3. **Install dependencies**: 
+    ```
+    npm install
+    ```
+4. **Create a `.env` file in the root directory**and add the following environment variables:
+    ```
+    VITE_TODOIST_API_KEY=your_api_key_here
+    VITE_TODOIST_API_URL=your_api_url_here
+    ```
+    * Replace `your_api_key_here` and `your_api_url_here` with the actual values required for API integration.
+
+## 🚀 Deployment
+This project is deployed on Vercel.
+
+## 🔮 Future Enhancements
+- [ ] **User Authentication**: Implement user login and registration to personalize task management.
+- [ ] **Due Dates & Reminders**: Add functionality to set due dates and reminders for tasks.
+- [ ] **Subtasks**: Enable breaking down tasks into smaller, manageable subtasks.
+- [ ] **Drag & Drop Interface**: Integrate drag-and-drop functionality for task prioritization and organization.
+- [ ] **Offline Support**: Allow users to access and manage tasks without an internet connection.
 
 ---
 Made with ❤️ by [Sivakumar Nanchappan]
